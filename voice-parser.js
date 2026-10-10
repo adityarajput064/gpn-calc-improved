@@ -76,8 +76,14 @@ export function parseSpokenExpression(transcript = "") {
       i++; if (tokens[i] === "of") i++;
       if (tokens[i] === "(") { output.push(token + "("); i++; continue; }
       if (i < tokens.length && (/^\d+(?:[.,]\d+)?$/u.test(tokens[i]) || NUMBER_WORDS.has(tokens[i]) || /^[a-z]$/u.test(tokens[i]) || tokens[i] === "pi")) {
-        const next = NUMBER_WORDS.has(tokens[i]) ? String(NUMBER_WORDS.get(tokens[i++])) : tokens[i++];
-        output.push(token + "(" + (next === "pi" ? "π" : next) + ")");
+        if (NUMBER_WORDS.has(tokens[i]) || /^\d+(?:[.,]\d+)?$/u.test(tokens[i])) {
+          const start = i;
+          while (i < tokens.length && (NUMBER_WORDS.has(tokens[i]) || /^\d+(?:[.,]\d+)?$/u.test(tokens[i]) || tokens[i] === "hundred" || tokens[i] === "thousand" || tokens[i] === "decimal" || tokens[i] === "and")) i++;
+          output.push(token + "(" + numberFromWords(tokens.slice(start, i)) + ")");
+        } else {
+          const next = tokens[i++];
+          output.push(token + "(" + (next === "pi" ? "π" : next) + ")");
+        }
       } else output.push(token);
       continue;
     }
@@ -88,4 +94,5 @@ export function parseSpokenExpression(transcript = "") {
   const open = (expression.match(/\(/g) || []).length, close = (expression.match(/\)/g) || []).length;
   return expression + ")".repeat(Math.max(0, open - close));
 }
+
 
