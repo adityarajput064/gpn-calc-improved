@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GPN CALC</title>
+<meta name="theme-color" content="#1d2730">
+<meta name="description" content="A mobile-friendly engineering calculator with mechanical, thermal, and fluid formula helpers.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="GPN CALC">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%231d2730'/%3E%3Ccircle cx='20' cy='20' r='11' fill='none' stroke='%23e8590c' stroke-width='4' stroke-dasharray='3.6 2.8'/%3E%3Ccircle cx='20' cy='20' r='8' fill='%23e8590c'/%3E%3Ccircle cx='20' cy='20' r='4.5' fill='%231d2730'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+<header><h1 class="brand"><span class="logo"></span>GPN CALC</h1><div><button id="inst" class="hb">Install</button> <button id="theme" class="hb" aria-label="Switch color theme">Theme</button></div></header>
+<div id="ihelp" class="panel" hidden><b>Install on your phone</b><br>Android (Chrome): ⋮ menu → <i>Install app</i> or <i>Add to Home screen</i>.<br>iPhone (Safari): Share → <i>Add to Home Screen</i>.<br><button class="hb" onclick="this.parentNode.hidden=true" style="margin-top:6px">Close</button></div>
+<div class="tabs" role="tablist" aria-label="Calculator sections">
+<button id="tab-nb" role="tab" aria-controls="nb" aria-selected="false" tabindex="-1" data-t="nb">Notebook</button>
+<button id="tab-calc" role="tab" aria-controls="calc" aria-selected="true" tabindex="0" data-t="calc">Calculator</button>
+<button id="tab-form" role="tab" aria-controls="form" aria-selected="false" tabindex="-1" data-t="form">Formulas</button>
+<button id="tab-unit" role="tab" aria-controls="unit" aria-selected="false" tabindex="-1" data-t="unit">Units</button>
+<button id="tab-solve" role="tab" aria-controls="solve" aria-selected="false" tabindex="-1" data-t="solve">Solve</button>
+<button id="tab-tools" role="tab" aria-controls="tools" aria-selected="false" tabindex="-1" data-t="tools">Tools</button>
+<button id="tab-graph" role="tab" aria-controls="graph" aria-selected="false" tabindex="-1" data-t="graph">Graph</button>
+<button id="tab-steam" role="tab" aria-controls="steam" aria-selected="false" tabindex="-1" data-t="steam">Steam</button>
+<button id="tab-const" role="tab" aria-controls="const" aria-selected="false" tabindex="-1" data-t="const">Constants</button>
+<button id="tab-ref" role="tab" aria-controls="ref" aria-selected="false" tabindex="-1" data-t="ref">Reference</button>
+<button id="tab-about" role="tab" aria-controls="about" aria-selected="false" tabindex="-1" data-t="about">About</button>
+</div>
+
+<section id="calc" class="panel" role="tabpanel" aria-labelledby="tab-calc" tabindex="0">
+<div class="disp"><input id="ex" inputmode="decimal" autocomplete="off" placeholder="0" aria-label="Expression"><div class="res" id="res" aria-live="polite" aria-atomic="true"></div></div>
+<div class="bar"><button id="deg" class="on">DEG</button><button id="rad">RAD</button><button id="grd">GRAD</button><button id="kb" title="Switch between number and text keyboard input">Keyboard</button><button id="mic" title="Speak an equation">Mic</button><select id="vl1" class="vl" aria-label="Voice language"><option value="en-IN">English</option><option value="hi-IN">हिन्दी</option><option value="mr-IN">मराठी</option><option value="gu-IN">ગુજરાતી</option></select><button id="mode" title="Switch calculator type">Simple</button><button id="frac" title="Show result as fraction">a/b</button><button id="dg" title="Significant digits in answer">Sig: Auto</button><span id="mem">M: 0</span></div>
+<div class="pad" id="pad" hidden></div><div id="kp"><div class="pad" id="k1"></div><div class="pad p5" id="k3" style="margin-top:6px" hidden></div><div class="pad p5" id="k2" style="margin-top:6px"></div></div>
+<div class="hist" id="hist" aria-label="History"></div>
+</section>
+
+<section id="nb" class="panel" role="tabpanel" aria-labelledby="tab-nb" tabindex="0" hidden>
+<div class="disp"><div id="ned" contenteditable="true" role="textbox" aria-multiline="true" inputmode="none" spellcheck="false" aria-label="Equation"></div><div class="res" id="nres" aria-live="polite" aria-atomic="true"></div></div>
+<div class="bar"><button id="ndg">Sig: Auto</button><button id="nsd">S&#8660;D</button><button id="nmic" title="Speak an equation">Mic</button><select id="vl2" class="vl" aria-label="Voice language"><option value="en-IN">English</option><option value="hi-IN">हिन्दी</option><option value="mr-IN">मराठी</option><option value="gu-IN">ગુજરાતી</option></select></div>
+<div class="pad p5" id="nk"></div>
+</section>
+
+<section id="form" class="panel" role="tabpanel" aria-labelledby="tab-form" tabindex="0" hidden>
+<div class="f"><label for="fsel">Formula</label><select id="fsel"></select></div>
+<div class="row f" id="fin"></div>
+<div class="out" id="fout"></div>
+<div class="note" id="fnote"></div>
+</section>
+
+<section id="unit" class="panel" role="tabpanel" aria-labelledby="tab-unit" tabindex="0" hidden>
+<div class="f"><label for="ucat">Category</label><select id="ucat"></select>
+<div class="row"><div><label for="uval">Value</label><input id="uval" type="number" value="1" step="any"></div>
+<div><label for="ufrom">From</label><select id="ufrom"></select></div></div></div>
+<div class="out" id="uout"></div>
+</section>
+
+<section id="const" class="panel" role="tabpanel" aria-labelledby="tab-const" tabindex="0" hidden>
+<div class="note" style="margin:0 0 6px">Tap a row to copy its value into the calculator.</div>
+<table class="tbl" id="ctbl"></table>
+</section>
+
+<section id="solve" class="panel" role="tabpanel" aria-labelledby="tab-solve" tabindex="0" hidden>
+<div class="f"><label for="msz">Linear equations  Ax = b (size)</label><select id="msz"><option>2</option><option selected>3</option><option>4</option></select></div>
+<div id="mgrid" style="margin-top:8px"></div>
+<div class="bar"><button id="msolve">Solve</button><span>Last column = b</span></div>
+<div class="out" id="mout"></div>
+<hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
+<div class="f"><label for="nf">Solve f(x) = 0 (use x)</label><input id="nf" value="x^3-2*x-5">
+<div class="row"><div><label for="nx">Guess x₀</label><input id="nx" type="number" value="2" step="any"></div><div style="display:flex;align-items:end"><div class="bar" style="margin:0"><button id="nsolve">Find root</button></div></div></div></div>
+<div class="out" id="nout"></div>
+</section>
+
+<section id="tools" class="panel" role="tabpanel" aria-labelledby="tab-tools" tabindex="0" hidden>
+<div class="f"><label for="tsel">Tool</label><select id="tsel"></select></div>
+<div class="f" id="tin"></div>
+<div class="out" id="tout"></div><div class="note" id="tnote"></div>
+</section>
+
+<section id="graph" class="panel" role="tabpanel" aria-labelledby="tab-graph" tabindex="0" hidden>
+<div class="f"><label for="gf">y = f(x)</label><input id="gf" value="sin(x)*x">
+<div class="row"><div><label for="gx0">x min</label><input id="gx0" type="number" value="-10"></div><div><label for="gx1">x max</label><input id="gx1" type="number" value="10"></div></div></div>
+<canvas id="cv" width="520" height="320" style="width:100%;margin-top:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)"></canvas>
+<div class="bar"><button id="gplot">Plot</button><span>Angles in radians</span></div>
+</section>
+
+<section id="steam" class="panel" role="tabpanel" aria-labelledby="tab-steam" tabindex="0" hidden>
+<div class="f"><label for="sp">Saturated steam at pressure (bar, 1 to 100)</label><input id="sp" type="number" value="7" step="any" min="1" max="100"></div>
+<div class="out" id="sout"></div>
+<div class="note">Linear interpolation between the rows below (approximate). h in kJ/kg, v in m³/kg.</div>
+<table class="tbl" id="stbl"></table>
+</section>
+
+<section id="ref" class="panel" role="tabpanel" aria-labelledby="tab-ref" tabindex="0" hidden>
+<div class="f"><label for="rq">Search (symbol, unit, name)</label><input id="rq" placeholder="e.g. enthalpy, kPa, mass flowrate"></div>
+<div id="rbody"></div>
+</section>
+
+<section id="about" class="panel about" role="tabpanel" aria-labelledby="tab-about" tabindex="0" hidden>
+<span class="logo"></span>
+<div class="brand">GPN CALC</div>
+<h2>Designed by Aditya Kumar</h2>
+<p>Aditya is a Mechanical Engineering student who likes to know how things really work, from a gear train to a line of code. He is curious, hardworking and practical, and he learns by building.</p>
+<p>GPN CALC puts a scientific calculator, formula sheet, unit converter, equation solver, graph plotter and steam table in one pocket tool, so an engineering student does not need five different apps.</p>
+<p><b>Built by a student, for students.</b></p>
+</section>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
