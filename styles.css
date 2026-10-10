@@ -17,6 +17,7 @@ button,select,input{font:inherit;color:inherit}
 .disp{background:var(--disp);color:var(--dispink);border-radius:8px;padding:10px 12px;font-family:"IBM Plex Mono",monospace}
 .disp input{width:100%;background:none;border:0;outline:0;color:inherit;font-size:20px;font-family:inherit}
 .res{text-align:right;font-size:30px;min-height:40px;overflow-x:auto;white-space:nowrap}
+.error-help{margin-top:8px;padding:8px 10px;border:1px solid #e87979;border-radius:6px;background:#652b2b;color:#fff;font:13px/1.5 "IBM Plex Sans",system-ui,sans-serif;white-space:normal;text-align:left}
 .bar{display:flex;gap:8px;align-items:center;margin:8px 0;font-size:13px;color:var(--mute)}
 .bar button{padding:4px 10px;border:1px solid var(--line);background:var(--key);border-radius:5px;cursor:pointer}
 .bar .on{background:var(--ink);color:var(--bg)}

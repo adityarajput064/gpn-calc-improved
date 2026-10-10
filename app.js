@@ -10,14 +10,32 @@ const tr=f=>x=>f(rad(x)), itr=f=>x=>ang(f(x));
 const F={sin:tr(Math.sin),cos:tr(Math.cos),tan:tr(Math.tan),asin:itr(Math.asin),acos:itr(Math.acos),atan:itr(Math.atan),
 ln:Math.log,log:Math.log10,sqrt:Math.sqrt,abs:Math.abs,fact,PI:Math.PI,e:Math.E};
 let dig=0;
-const fmt=r=>{if(!isFinite(r))throw 0;if(r===0)return'0';const n=Number(r.toPrecision(dig||12)),a=Math.abs(n);if(a>=1e10||a<1e-3){const [m,e]=n.toExponential(dig?dig-1:9).split('e');return Number(m)+'×10^'+Number(e)}return String(n)};
+const fmt=r=>{if(!isFinite(r))throw new Error('Result is not a finite number');if(r===0)return'0';const n=Number(r.toPrecision(dig||12)),a=Math.abs(n);if(a>=1e10||a<1e-3){const [m,e]=n.toExponential(dig?dig-1:9).split('e');return Number(m)+'×10^'+Number(e)}return String(n)};
 function ev(s,xv){return evaluateExpression(s,{functions:F,ans,x:xv})}
-const ex=$('#ex'),res=$('#res');let frac=false;
+const ex=$('#ex'),res=$('#res'),errorHelp=$('#error-help');let frac=false;
 const toF=r=>{if(Number.isInteger(r))return String(r);const s=r<0?'−':'',x=Math.abs(r);let h1=1,h0=0,k1=0,k0=1,b=x;for(let i=0;i<20;i++){const a=Math.floor(b);[h1,h0]=[a*h1+h0,h1];[k1,k0]=[a*k1+k0,k1];if(Math.abs(x-h1/k1)<1e-9||b===a)break;b=1/(b-a)}return k1>1e6?fmt(r):s+h1+'/'+k1};
 const sh=r=>frac?toF(r):eng?toE(r):fmt(r);
 function ins(t){const s=ex.selectionStart,e=ex.selectionEnd;ex.setRangeText(t,s,e,'end');ex.focus();live()}
-function live(){try{if(ex.value.trim()){res.style.opacity=.6;res.textContent=sh(ev(ex.value))}else res.textContent=''}catch(e){res.textContent=''}}
-function eq(){if(!ex.value.trim())return;try{const r=ev(ex.value);const t=fmt(r);addH(ex.value+' = '+t,ex.value);ans=r;res.style.opacity=1;res.textContent=sh(r);ex.value=''}catch(e){res.style.opacity=1;res.textContent='Error'}}
+function explainError(error){
+ const message=String(error?.message||error||'');
+ let m=message.match(/^Unknown function: (.+)$/);
+ if(m)return `“${m[1]}” function nahi mili. sin, cos, tan, asin, acos, atan, ln, log, sqrt, abs, fact, cbrt ya root use karke dekho.`;
+ m=message.match(/^Unknown value: (.+)$/);
+ if(m)return `“${m[1]}” value samajh nahi aayi. Number, x, ANS, PI, e ya supported function ka naam check karo.`;
+ if(message==='Unexpected closing parenthesis')return `Extra “)” bracket hai. Brackets ko pair mein check karo; example: (2+3)×4.`;
+ if(message==='Missing closing parenthesis')return `Ek opening “(” ka closing “)” missing hai. Example: sin(30) ya (2+3).`;
+ if(message==='Expected a value')return `Kisi operator ke baad number ya value missing hai. Example: 8×(2+3).`;
+ if(message.startsWith('Unexpected token:'))return `“${message.slice('Unexpected token:'.length).trim()}” yahan fit nahi ho raha. Do values ke beech operator lagao, jaise 2×3.`;
+ if(message==='Factorial needs a non-negative integer')return `Factorial (!) sirf 0 ya positive whole number par lagta hai. Example: 5!; 2.5! valid nahi hai.`;
+ if(message==='Invalid character in expression'||message==='Could not read expression')return `Kisi symbol ko calculator nahi padh paaya. × ya * se multiply, ÷ ya / se divide karo; extra letters/symbols hatao.`;
+ if(message==='Expression is empty')return `Pehle equation type karo, phir “=” dabao.`;
+ if(message==='Result is not a finite number')return `Is equation ka result defined nahi hai—zero se divide ya invalid square root/log ho sakta hai. Denominator aur function ke andar ki value check karo.`;
+ return `Equation calculate nahi hui. Brackets, operators, function ke naam aur denominator check karo.`;
+}
+function clearError(){errorHelp.hidden=true;errorHelp.textContent=''}
+function showError(error){res.style.opacity=1;res.textContent='Equation check karo';errorHelp.textContent=explainError(error);errorHelp.hidden=false}
+function live(){clearError();try{if(ex.value.trim()){res.style.opacity=.6;res.textContent=sh(ev(ex.value))}else res.textContent=''}catch(e){res.textContent=''}}
+function eq(){if(!ex.value.trim())return;try{const r=ev(ex.value);const t=fmt(r);addH(ex.value+' = '+t,ex.value);ans=r;res.style.opacity=1;res.textContent=sh(r);ex.value='';clearError()}catch(e){showError(e)}}
 function addH(l,v){const d=document.createElement('div');d.textContent=l;d.onclick=()=>{ex.value=v;ex.focus();live()};$('#hist').prepend(d)}
 const keys=[['sin','sin(','fn'],['cos','cos(','fn'],['tan','tan(','fn'],['ln','ln(','fn'],['log','log(','fn'],['AC','ac','op'],
 ['sin⁻¹','asin(','fn'],['cos⁻¹','acos(','fn'],['tan⁻¹','atan(','fn'],['√','√(','fn'],['x²','^2','fn'],['⌫','del','op'],
