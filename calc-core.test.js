@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluateExpression } from '../calc-core.js';
-import { FORMULAS } from '../formulas.js';
+import { evaluateExpression } from './calc-core.js';
+import { FORMULAS } from './formulas.js';
 
 const F={PI:Math.PI,e:Math.E,ans:42,fact:n=>{let r=1;for(let i=2;i<=n;i++)r*=i;return r;},sin:x=>Math.sin(x*Math.PI/180),cos:x=>Math.cos(x*Math.PI/180),sqrt:Math.sqrt,abs:Math.abs};
 const ev=(s,x=0)=>evaluateExpression(s,{functions:F,ans:42,x});
