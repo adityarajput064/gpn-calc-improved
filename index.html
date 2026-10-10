@@ -35,14 +35,14 @@
 
 <section id="calc" class="panel" role="tabpanel" aria-labelledby="tab-calc" tabindex="0">
 <div class="disp"><input id="ex" inputmode="decimal" autocomplete="off" placeholder="0" aria-label="Expression"><div class="res" id="res" aria-live="polite" aria-atomic="true"></div></div>
-<div class="bar"><button id="deg" class="on">DEG</button><button id="rad">RAD</button><button id="grd">GRAD</button><button id="kb" title="Switch between number and text keyboard input">Keyboard</button><button id="mic" title="Speak an equation">Mic</button><select id="vl1" class="vl" aria-label="Voice language"><option value="en-IN">English</option><option value="hi-IN">हिन्दी</option><option value="mr-IN">मराठी</option><option value="gu-IN">ગુજરાતી</option></select><button id="mode" title="Switch calculator type">Simple</button><button id="frac" title="Show result as fraction">a/b</button><button id="dg" title="Significant digits in answer">Sig: Auto</button><span id="mem">M: 0</span></div>
+<div class="bar"><button id="deg" class="on">DEG</button><button id="rad">RAD</button><button id="grd">GRAD</button><button id="kb" title="Switch between number and text keyboard input">Keyboard</button><button id="mic" title="Speak an equation">Mic</button><select id="vl1" class="vl" aria-label="Voice language"><option value="en-IN">English / Hinglish</option><option value="hi-IN">हिन्दी</option><option value="mr-IN">मराठी</option><option value="gu-IN">ગુજરાતી</option></select><button id="mode" title="Switch calculator type">Simple</button><button id="frac" title="Show result as fraction">a/b</button><button id="dg" title="Significant digits in answer">Sig: Auto</button><span id="mem">M: 0</span></div>
 <div class="pad" id="pad" hidden></div><div id="kp"><div class="pad" id="k1"></div><div class="pad p5" id="k3" style="margin-top:6px" hidden></div><div class="pad p5" id="k2" style="margin-top:6px"></div></div>
 <div class="hist" id="hist" aria-label="History"></div>
 </section>
 
 <section id="nb" class="panel" role="tabpanel" aria-labelledby="tab-nb" tabindex="0" hidden>
 <div class="disp"><div id="ned" contenteditable="true" role="textbox" aria-multiline="true" inputmode="none" spellcheck="false" aria-label="Equation"></div><div class="res" id="nres" aria-live="polite" aria-atomic="true"></div></div>
-<div class="bar"><button id="ndg">Sig: Auto</button><button id="nsd">S&#8660;D</button><button id="nmic" title="Speak an equation">Mic</button><select id="vl2" class="vl" aria-label="Voice language"><option value="en-IN">English</option><option value="hi-IN">हिन्दी</option><option value="mr-IN">मराठी</option><option value="gu-IN">ગુજરાતી</option></select></div>
+<div class="bar"><button id="ndg">Sig: Auto</button><button id="nsd">S&#8660;D</button><button id="nmic" title="Speak an equation">Mic</button><select id="vl2" class="vl" aria-label="Voice language"><option value="en-IN">English / Hinglish</option><option value="hi-IN">हिन्दी</option><option value="mr-IN">मराठी</option><option value="gu-IN">ગુજરાતી</option></select></div>
 <div class="pad p5" id="nk"></div>
 </section>
 
@@ -111,6 +111,17 @@
 </section>
 </div>
 
+<dialog id="voice-review" class="voice-review" aria-labelledby="voice-review-title">
+<h2 id="voice-review-title">Check voice equation</h2>
+<label for="voice-heard">Heard</label>
+<textarea id="voice-heard" rows="2" readonly></textarea>
+<label for="voice-expression">Equation — edit if needed</label>
+<input id="voice-expression" autocomplete="off" spellcheck="false">
+<p id="voice-review-help" class="note"></p>
+<div class="voice-review-actions"><button id="voice-cancel" type="button">Cancel</button><button id="voice-use" type="button">Use equation</button></div>
+</dialog>
+
 <script type="module" src="app.js"></script>
 </body>
 </html>
+

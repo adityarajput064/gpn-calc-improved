@@ -74,3 +74,13 @@ canvas{display:block}
 input,select{min-height:44px;font-size:16px}
 button{touch-action:manipulation}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+.voice-review{width:min(92vw,460px);border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);padding:18px;box-shadow:0 16px 48px #0005}
+.voice-review::backdrop{background:#0009}
+.voice-review h2{font-size:18px;margin:0 0 12px}
+.voice-review label{display:block;margin:10px 0 4px;font-weight:600}
+.voice-review textarea,.voice-review input{width:100%;padding:9px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.voice-review textarea{resize:vertical}
+.voice-review-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.voice-review-actions button{padding:8px 12px;border:1px solid var(--line);border-radius:6px;background:var(--key);color:var(--ink)}
+#voice-use{background:var(--acc);color:var(--accink);border-color:var(--acc)}

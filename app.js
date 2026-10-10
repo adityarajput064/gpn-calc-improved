@@ -1,5 +1,6 @@
 import { evaluateExpression } from './calc-core.js';
 import { FORMULAS } from './formulas.js';
+import { parseSpokenExpression } from './voice-parser.js';
 
 const $=s=>document.querySelector(s);
 let deg=true,ans=0,memv=0;
@@ -154,20 +155,23 @@ $('#mode').onclick=()=>setMode(!$('#k1').hidden);
 try{if(localStorage.getItem('gpnMode')==='s')setMode(true)}catch(e){}
 /* Voice input */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-const vlang=()=>$('#vl1').value,EQW=/equal|barabar|answer|बराबर|बरोबर|બરાબર|उत्तर|જવાબ/i;
+const vlang=()=>$('#vl1').value;
 try{const v=localStorage.getItem('gpnLang');if(v&&$('#vl1').querySelector('[value="'+v+'"]'))$('#vl1').value=$('#vl2').value=v}catch(e){}
 ['#vl1','#vl2'].forEach(q=>$(q).onchange=e=>{$('#vl1').value=$('#vl2').value=e.target.value;try{localStorage.setItem('gpnLang',e.target.value)}catch(_){}});
-const DIG={};'०१२३४५६७८९'.split('').forEach((c,i)=>DIG[c]=i);'૦૧૨૩૪૫૬૭૮૯'.split('').forEach((c,i)=>DIG[c]=i);
-const INW={'शून्य':0,'एक':1,'दो':2,'तीन':3,'चार':4,'पांच':5,'पाँच':5,'छह':6,'छे':6,'सात':7,'आठ':8,'नौ':9,'दस':10,'दोन':2,'पाच':5,'सहा':6,'नऊ':9,'दहा':10,'શૂન્ય':0,'એક':1,'બે':2,'ત્રણ':3,'ચાર':4,'પાંચ':5,'છ':6,'સાત':7,'આઠ':8,'નવ':9,'દસ':10};
-const INO=[[/वर्गमूल|वर्गमूळ|વર્ગમૂળ|स्क्वेअर रूट|स्क्वायर रूट|સ્ક્વેર રૂટ/g,'√('],[/गुणाकार|गुणिले|गुणा|गुना|ગુણાકાર|ગુણ્યા|ગુણ|टाइम्स|ટાઇમ્સ/g,'×'],[/भागाकार|भागिले|भाग|ભાગાકાર|ભાગ્યા|ભાગ/g,'÷'],[/जोड़|जोड|बेरीज|प्लस|अधिक|ઉમેરો|વત્તા|પ્લસ/g,'+'],[/घटा|वजा|माइनस|ऋण|ઓછા|બાદ|માઇનસ|માઈનસ/g,'−'],[/वर्ग|વર્ગ/g,'^2'],[/घन|ઘન/g,'^3'],[/घात|ઘાત/g,'^'],[/दशमलव|दशांश|बिंदु|बिंदू|દશાંશ|બિંદુ/g,'.'],[/पाई|પાઈ/g,'π'],[/बराबर|बरोबर|બરાબર|उत्तर|જવાબ/g,'']];
-function ind(t){t=t.replace(/[\u0966-\u096f\u0ae6-\u0aef]/g,c=>DIG[c]);t=t.split(/\s+/).map(w=>w in INW?INW[w]:w).join(' ');INO.forEach(([r,x])=>t=t.replace(r,x));return t}
-const NW={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,ek:1,teen:3,char:4,paanch:5,panch:5,saat:7,aath:8,nau:9,das:10};
-const SP=[[/multiplied by|times|into|guna|gunaa/g,'×'],[/divided by|divide|bhaag|by/g,'÷'],[/plus|add|jod/g,'+'],[/minus|negative|subtract|ghata/g,'−'],[/square root of|square root|root/g,'√('],[/squared|square/g,'^2'],[/cubed|cube/g,'^3'],[/to the −/g,'^−'],[/(?:raised|raise|raises)\s+to(?:\s+the\s+power(?:\s+of)?)?|to the power(?: of)?|power(?: of)?|upon/g,'^'],[/\bpi\b|pie/g,'π'],[/sine|sin/g,'sin('],[/cosine|cos/g,'cos('],[/tangent|tan/g,'tan('],[/open bracket|left bracket/g,'('],[/close bracket|right bracket/g,')'],[/percent/g,'%'],[/point|dot/g,'.'],[/equals?|barabar|answer/g,'']];
-function say2ex(t){t=ind(' '+t.toLowerCase()+' ');Object.keys(NW).forEach(w=>t=t.replace(new RegExp('\\b'+w+'\\b','g'),NW[w]));SP.forEach(([r,s])=>t=t.replace(r,s));
- t=t.replace(/(sin\(|cos\(|tan\(|√\()\s*(\d+(?:\.\d+)?)/g,'$1$2)').replace(/\s+/g,'');
- const o=(t.match(/\(/g)||[]).length-(t.match(/\)/g)||[]).length;return o>0?t+')'.repeat(o):t}
-$('#kb').onclick=()=>{const t=ex.inputMode!=='text';ex.inputMode=t?'text':'decimal';$('#kb').classList.toggle('on',t);ex.blur();ex.focus()};
-ex.addEventListener('input',()=>{const v=ex.value;if(/\b(plus|minus|times|into|divided|multiplied|power|raise|raised|negative|squared|cubed|root|percent|point|zero|one|two|three|four|five|six|seven|eight|nine|ten)\b/i.test(v)){ex.value=say2ex(v);live()}});
+const voiceDialog=$('#voice-review');let voiceTarget='calc';
+function showVoiceReview(raw,target){
+ voiceTarget=target;$('#voice-heard').value=raw;$('#voice-expression').value=parseSpokenExpression(raw);
+ $('#voice-review-help').textContent='Check the recognized words and edit the equation before using it. Recognition quality depends on your browser and selected language.';
+ if(!voiceDialog.open)voiceDialog.showModal();
+ $('#voice-expression').focus();
+}
+$('#voice-cancel').onclick=()=>voiceDialog.close();
+$('#voice-use').onclick=()=>{
+ const expression=$('#voice-expression').value.trim();
+ if(!expression){$('#voice-expression').focus();return}
+ voiceDialog.close();
+ if(voiceTarget==='nb')ntxt(expression);else ins(expression);
+};
 const DG=[0,3,4,5,6,8];$('#dg').onclick=()=>{dig=DG[(DG.indexOf(dig)+1)%DG.length];$('#dg').textContent='Sig: '+(dig||'Auto');rl()};
 /* Notebook editor */
 const ned=$('#ned'),nres=$('#nres'),Z='\u200b';let nrg=null;
@@ -281,28 +285,27 @@ Object.assign(U,{'SI prefix':{T:1e12,G:1e9,M:1e6,k:1e3,'(base)':1,m:1e-3,'μ':1e
 Object.keys(U).filter(k=>![...ucat.options].some(o=>o.value===k)).forEach(k=>ucat.add(new Option(k)));
 C.push(['Standard atmosphere','1.01325','bar a'],['1 atm in mmHg','760','mmHg'],['1 atm in psi','14.7','lb/in²'],['Triple point of water','273.16','K'],['Standard temperature (STP)','0','°C'],['Water cp','4.19','kJ/kg°C'],['Water hf at 100 °C','419','kJ/kg'],['Water hfg at 100 °C','2258','kJ/kg'],['Specific gravity of water','1','']);
 $('#ctbl').innerHTML=C.map(([n,v,u])=>'<tr data-v="'+v+'"><td>'+n+'</td><td>'+v+' '+u+'</td></tr>').join('');
-let rec=null;
-$('#mic').onclick=()=>{
- if(!SR){res.textContent='Mic not supported here. Use Chrome.';return}
+let rec=null,activeMic=null;
+function startVoice(target){
+ const output=target==='nb'?nres:res,button=target==='nb'?$('#nmic'):$('#mic');
+ if(!SR){output.textContent='Voice recognition is unavailable in this browser. Try Chrome, or type the equation.';return}
  if(rec){rec.stop();return}
- rec=new SR();rec.lang=vlang();rec.interimResults=false;
- rec.onstart=()=>{$('#mic').classList.add('on');$('#mic').textContent='Listening...'};
- rec.onresult=e=>{const raw=e.results[0][0].transcript;ins(say2ex(raw));if(EQW.test(raw))eq()};
- rec.onerror=e=>{res.textContent=(e.error==='not-allowed'||e.error==='service-not-allowed')?'Mic blocked. Allow microphone or open the link directly in Chrome.':'Mic error: '+e.error};
- rec.onend=()=>{rec=null;$('#mic').classList.remove('on');$('#mic').textContent='Mic'};
- try{rec.start()}catch(err){rec=null}};
-/* Notebook voice */
-let rec2=null;
-const v2h=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\u221a\(([^()]*)\)/g,(m,a)=>'<span class="sq"><span class="in">'+Z+a+'</span></span>').replace(/\^\(?(\u2212?[\d.]+)\)?/g,(m,a)=>'<span class="pw">'+Z+a+'</span>');
-$('#nmic').onclick=()=>{
- if(!SR){nres.textContent='Mic not supported here. Use Chrome.';return}
- if(rec2){rec2.stop();return}
- rec2=new SR();rec2.lang=vlang();rec2.interimResults=false;
- rec2.onstart=()=>{$('#nmic').classList.add('on');$('#nmic').textContent='Listening...'};
- rec2.onresult=e=>{const raw=e.results[0][0].transcript;nrs();document.execCommand('insertHTML',false,v2h(say2ex(raw))+Z);nl();if(EQW.test(raw))$('#nk').lastChild.click()};
- rec2.onerror=e=>{nres.textContent=(e.error==='not-allowed'||e.error==='service-not-allowed')?'Mic blocked. Allow microphone in Chrome site settings.':'Mic error: '+e.error};
- rec2.onend=()=>{rec2=null;$('#nmic').classList.remove('on');$('#nmic').textContent='Mic'};
- try{rec2.start()}catch(err){rec2=null}};
+ activeMic=button;rec=new SR();rec.lang=vlang();rec.interimResults=true;rec.maxAlternatives=3;
+ rec.onstart=()=>{button.classList.add('on');button.textContent='Listening…'};
+ rec.onresult=e=>{
+  const heard=[];
+  for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)heard.push(e.results[i][0].transcript);
+  if(heard.length)showVoiceReview(heard.join(' '),target);
+ };
+ rec.onerror=e=>{
+  const messages={'not-allowed':'Microphone permission is blocked. Allow it in browser settings.','service-not-allowed':'This browser speech service is unavailable. Try Chrome.','no-speech':'No speech detected. Try again a little closer to the microphone.','network':'Speech recognition needs an internet connection.'};
+  output.textContent=messages[e.error]||('Mic error: '+e.error);
+ };
+ rec.onend=()=>{rec=null;if(activeMic){activeMic.classList.remove('on');activeMic.textContent='Mic';activeMic=null}};
+ try{rec.start()}catch(err){rec=null;button.classList.remove('on');button.textContent='Mic';output.textContent='Could not start voice recognition. Try again.'}
+}
+$('#mic').onclick=()=>startVoice('calc');
+$('#nmic').onclick=()=>startVoice('nb');
 st();
 rf();ru();
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
